@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Students
+from .models import Students, Course, Enrollment
 from django.contrib.auth.hashers import make_password
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -35,3 +35,35 @@ class StudentSerializer(serializers.ModelSerializer):
 
         # ✅ Must return data correctly (not 'dta')
         return data
+
+class CourseSerializer(serializers.ModelSerializer):
+    enrolled_students = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Course
+        fields = [
+            'courseId',
+            'name',
+            'description',
+            'duration',
+            'instructor',
+            'level',
+            'fee',
+            'enrolled_students',
+        ]
+
+    def get_enrolled_students(self, obj):
+        return obj.enrolled_students.count()
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    student_name = serializers.CharField(source='student.name', read_only=True)
+    course_name = serializers.CharField(source='course.name', read_only=True)
+
+    class Meta:
+        model = Enrollment
+        fields = [
+            'enrollment_id',
+            'student_id', 'student_name',
+            'course_id', 'course_name',
+            'marks', 'remark', 'status','created_on'
+        ]
